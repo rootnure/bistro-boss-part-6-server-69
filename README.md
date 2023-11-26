@@ -5,4 +5,4 @@
 ## Today's Work
 
 - POST api for add new item to menu added
--
+- DELETE api for an item to menu added
