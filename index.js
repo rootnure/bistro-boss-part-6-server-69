@@ -74,26 +74,21 @@ async function run() {
       res.send(users);
     });
 
-    app.get(
-      "/user/admin/:email",
-      verifyToken,
-      verifyAdmin,
-      async (req, res) => {
-        const email = req.params.email;
-        if (email !== req.decoded.email) {
-          return res.status(403).send({ message: "Forbidden Access" });
-        }
-        const query = { email: email };
-        const user = await userCollection.findOne(query);
-        let admin = false;
-        if (user) {
-          admin = user?.role === "admin";
-        }
-        res.send({ admin });
+    app.get("/user/admin/:email", verifyToken, async (req, res) => {
+      const email = req.params.email;
+      if (email !== req.decoded.email) {
+        return res.status(403).send({ message: "Forbidden Access" });
       }
-    );
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      let admin = false;
+      if (user) {
+        admin = user?.role === "admin";
+      }
+      res.send({ admin });
+    });
 
-    app.post("/users", verifyToken, verifyAdmin, async (req, res) => {
+    app.post("/users", async (req, res) => {
       const user = req.body;
       // insert email if user doesn't exists:
       // you can check this many ways (1. email unique (index in mongodb), 2. upsert, 3. simple checking)
@@ -136,6 +131,12 @@ async function run() {
       res.send(result);
     });
 
+    app.post("/menu", verifyToken, verifyAdmin, async (req, res) => {
+      const item = req.body;
+      const result = await menuCollection.insertOne(item);
+      res.send(result);
+    });
+
     // review related api
     app.get("/reviews", async (req, res) => {
       const result = await reviewCollection.find().toArray();
@@ -151,13 +152,13 @@ async function run() {
       res.send(result);
     });
 
-    app.post("/cart", async (req, res) => {
+    app.post("/cart", verifyToken, async (req, res) => {
       const cart = req.body;
       const result = await cartCollection.insertOne(cart);
       res.send(result);
     });
 
-    app.delete("/cart/:id", async (req, res) => {
+    app.delete("/cart/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await cartCollection.deleteOne(query);
