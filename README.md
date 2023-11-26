@@ -6,3 +6,5 @@
 
 - POST api for add new item to menu added
 - DELETE api for an item to menu added
+- GET api for a single item added
+- PATCH api for a single item added
